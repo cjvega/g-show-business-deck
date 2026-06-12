@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>G-Show 跨行业业务方案演示稿</title>
+<!--
+  deck_index.html — 多文件 slide deck 拼接器 · 双概览模式
+
+  概览默认使用轻量 poster 画廊，不加载 slide iframe。
+   · grid  自适应网格墙：用缩略图 + 文本卡片，首屏性能优先
+   · gallery 全屏覆盖，自动滑动，使用轻量缩略图 poster
+  演示 present：单页 fit 缩放翻页。ESC / ⊞ 回概览。
+  性能：manifest 每项可带 thumb，概览即用轻量 <img> 卡片，避免 N 个 iframe 同时加载。
+
+  用法：复制为 index.html；建 slides/ 放每页独立 HTML；编辑 MANIFEST。
+  可选覆盖：window.DECK_OVERVIEW = 'grid' | 'gallery'；URL ?ov=grid|gallery 临时强制。
+  键盘（演示）：← / → / Space / PgUp / PgDown / Home / End / 1-9 / P 打印 / ESC 回概览
+-->
+<script>
+  window.DECK_MANIFEST = [
+    { file: "slides/01-cover.html", label: "封面", labelEn: "Cover", title: "让每个实物对象，都能被现场讲清楚", titleEn: "Make every physical object easy to explain on site", thumb: "images/thumbs/p1-mobile-stand-lighting-showroom.webp" },
+    { file: "slides/02-positioning.html", label: "产品定义", labelEn: "Definition", title: "不是菜单，也不是投屏工具", titleEn: "Not a menu. Not a casting tool." },
+    { file: "slides/03-why-now.html", label: "为什么成立", labelEn: "Why Now", title: "客户不是缺屏幕", titleEn: "Customers do not lack screens" },
+    { file: "slides/04-core-loop.html", label: "核心闭环", labelEn: "Core Loop", title: "B 端人员扫码，B 端电视展示", titleEn: "B-side staff scan. B-side TV displays." },
+    { file: "slides/05-mobile-tv.html", label: "可移动电视", labelEn: "Mobile TV Stand", title: "电视可以跟着参观路线走", titleEn: "The TV can move with the visiting route", thumb: "images/thumbs/p1-mobile-stand-furniture-materials.webp" },
+    { file: "slides/06-display-content.html", label: "展示内容", labelEn: "Content Surface", title: "电视展示延展资料", titleEn: "Extended materials shown on TV", thumb: "images/thumbs/p1-mobile-stand-wine-tea.webp" },
+    { file: "slides/07-priority-map.html", label: "行业优先级", labelEn: "Industry Priority", title: "先找对象多、资料多、讲解强的行业", titleEn: "Prioritize object-rich, material-rich industries" },
+    { file: "slides/08-showroom.html", label: "展厅样品间", labelEn: "Showrooms", title: "灯具 / 家具 / 建材 / 卫浴展厅", titleEn: "Lighting, furniture and material showrooms", thumb: "images/thumbs/p1-mobile-stand-lighting-showroom.webp" },
+    { file: "slides/09-export-sample-room.html", label: "外贸样品间", labelEn: "Export Sample Rooms", title: "外贸样品间 / 工厂展厅", titleEn: "Export sample rooms and factory showrooms", thumb: "images/thumbs/p1-showroom-scan-tv.webp" },
+    { file: "slides/10-furniture-materials.html", label: "家居软装", labelEn: "Furniture & Materials", title: "家居软装 / 材料样品", titleEn: "Furniture soft decoration and material samples", thumb: "images/thumbs/p1-mobile-stand-furniture-materials.webp" },
+    { file: "slides/11-cosmetics.html", label: "化妆品零售", labelEn: "Cosmetics Retail", title: "化妆品 / 护肤品 / 香水零售", titleEn: "Cosmetics, skincare and fragrance retail", thumb: "images/thumbs/p1-mobile-stand-cosmetics-retail.webp" },
+    { file: "slides/12-wine-tea.html", label: "酒类茶饮", labelEn: "Wine & Tea", title: "酒类 / 茶饮 / 高价值食品", titleEn: "Wine, tea and high-value food", thumb: "images/thumbs/p1-mobile-stand-wine-tea.webp" },
+    { file: "slides/15-auto-equipment.html", label: "汽车设备", labelEn: "Auto & Equipment", title: "汽车 / 设备 / 工程机械", titleEn: "Automotive, equipment and machinery", thumb: "images/thumbs/p1-fixed-tv-automotive-showroom.webp" },
+    { file: "slides/14-real-estate.html", label: "房产空间", labelEn: "Real Estate & Space", title: "房产 / 酒店 / 空间销售", titleEn: "Real estate, hotels and space sales", thumb: "images/thumbs/p1-mobile-stand-real-estate-sales.webp" },
+    { file: "slides/13-restaurant.html", label: "餐饮包间", labelEn: "Private Dining", title: "餐饮包间 / 招牌菜 / 套餐", titleEn: "Private dining, signature dishes and set menus", thumb: "images/thumbs/p1-mobile-stand-restaurant-dining.webp" },
+    { file: "slides/16-jewelry-spa.html", label: "珠宝与美容", labelEn: "Jewelry & Spa", title: "珠宝高客单 / 美容 SPA 咨询", titleEn: "High-ticket jewelry and beauty SPA consultation", thumb: "images/thumbs/p1-mobile-stand-jewelry-showroom.webp" },
+    { file: "slides/17-sales-checklist.html", label: "销售筛选", labelEn: "Sales Qualification", title: "满足 4 条以上，就值得进入线索池", titleEn: "If 4 or more are true, qualify the lead" },
+    { file: "slides/18-next-step.html", label: "下一步", labelEn: "Next Step", title: "先跑通 P1", titleEn: "Validate P1 first" },
+  ];
+  window.DECK_WIDTH = 1920;
+  window.DECK_HEIGHT = 1080;
+  window.GALLERY_CARD_W = 300;       // 画廊卡片基准宽度
+  window.GALLERY_DRIFT_SECONDS = 80; // 画廊漂移一圈时长
+  window.DECK_OVERVIEW = 'gallery';
+</script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; font-family: -apple-system, "PingFang SC", sans-serif; background: #0a0a0a; }
+
+  .overview { position: fixed; inset: 0; }
+  body[data-mode="present"] .overview { display: none; }
+  body[data-mode="present"] .start-btn { display: none; }
+  body[data-mode="overview"] #present-ui { display: none; }
+  body[data-ov="grid"]    #ov-gallery { display: none; }
+  body[data-ov="gallery"] #ov-grid    { display: none; }
+  body[data-ov="gallery"][data-mode="overview"] { background: #0a0805; }
+  body[data-ov="grid"][data-mode="overview"]    { background: #efece4; }
+
+  /* ════════ 模式 1 · 自适应网格墙（一屏装得下→居中轻斜；装不下→舒适大小竖向滚动）════════ */
+  #ov-grid { display: flex; justify-content: center; perspective: 2200px; perspective-origin: 50% 42%;
+    background: radial-gradient(120% 90% at 50% 0%, #f4f1e9, #e7e3d8 75%); }
+  body[data-grid="fit"]    #ov-grid { overflow: hidden;   align-items: center; }
+  body[data-grid="scroll"] #ov-grid { overflow-y: auto; overflow-x: hidden; align-items: flex-start; padding: 74px 0 110px; }
+  .wall-wrap { }
+  body[data-grid="fit"]    .wall-wrap { transform: translateY(-3vh); }
+  .wall { display: grid; gap: 20px; transform-origin: center center; margin: 0 auto; }  /* 不用 preserve-3d：整墙作单个倾斜平面，命中测试可靠 */
+  #ov-grid .card {
+    position: relative; aspect-ratio: 16/9; border-radius: 9px; overflow: hidden; background: #241f18; cursor: pointer;
+    contain: layout paint style; transform: translateZ(0);
+    box-shadow: 0 16px 34px rgba(40,34,24,0.20), 0 3px 10px rgba(40,34,24,0.12);
+    transition: transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s;
+  }
+  #ov-grid .card:hover {
+    transform: scale(1.18);
+    box-shadow: 0 48px 92px rgba(40,34,24,0.36), 0 14px 30px rgba(40,34,24,0.22); z-index: 20;
+  }
+
+  /* ════════ 模式 2 · 无限画廊 ════════ */
+  #ov-gallery { overflow: hidden; perspective: 2200px; perspective-origin: 50% 42%;
+    background: radial-gradient(130% 120% at 50% 38%, #1b1610, #0a0805 82%); }
+  .stage3d { --rx: 18; --rz: 9; position: absolute; inset: 0; transform-style: preserve-3d; transform: scale(1.22) rotateX(18deg) rotateZ(-9deg); transform-origin: center center; }
+  .breathe { position: absolute; inset: 0; animation: breathe 26s ease-in-out infinite; transform-origin: center center; transform-style: preserve-3d; }
+  .drift-layer { position: absolute; top: 0; left: 0; will-change: transform; animation: drift var(--driftSec, 80s) linear infinite; transform-style: preserve-3d; }
+  #ov-gallery:hover .drift-layer { animation-play-state: paused; }
+  .gallery { display: grid; }
+  #ov-gallery .card {
+    position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; background: #241f18; cursor: pointer;
+    contain: layout paint style; transform: translateZ(0);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.42), 0 3px 9px rgba(0,0,0,0.3);
+    transition: transform .34s cubic-bezier(.2,.7,.2,1), box-shadow .34s; transform-style: preserve-3d; will-change: transform;
+  }
+  #ov-gallery .card:hover {
+    transform: translateZ(60px) rotateX(calc(var(--rx,18)*-1deg)) rotateZ(calc(var(--rz,9)*1deg)) scale(1.06);
+    box-shadow: 0 30px 64px rgba(0,0,0,0.55), 0 8px 20px rgba(0,0,0,0.4); z-index: 30;
+  }
+  .vignette { position: fixed; inset: 0; pointer-events: none; z-index: 20; box-shadow: inset 0 0 240px 70px rgba(8,6,3,0.62); }
+  @keyframes drift { from { transform: translate3d(0,0,0); } to { transform: translate3d(calc(var(--dx)*-1), calc(var(--dy)*-1), 0); } }
+  @keyframes breathe { 0%,100% { transform: scale(1.0); } 50% { transform: scale(1.045); } }
+
+  /* 卡片通用内容：概览页只用轻量 poster，不再加载 slide iframe */
+  .card .thumb { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(135deg, #342b20, #17130f); }
+  .card .thumb-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; opacity: 0.92; }
+  .card.has-thumb::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(11,9,6,0.06), rgba(11,9,6,0.72)); z-index: 1; }
+  .poster-pattern { position: absolute; inset: 0; opacity: 0.72; background:
+    radial-gradient(circle at 18% 18%, rgba(185,108,63,0.34), transparent 30%),
+    radial-gradient(circle at 78% 20%, rgba(71,82,71,0.38), transparent 32%),
+    linear-gradient(135deg, rgba(255,250,240,0.16), transparent 55%); }
+  .poster-copy { position: absolute; inset: auto 16px 18px 16px; z-index: 2; color: #fffaf0; pointer-events: none; }
+  .poster-kicker { margin-bottom: 7px; color: rgba(255,250,240,0.68); font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .poster-title { color: #fffaf0; font-family: Georgia, "Songti SC", serif; font-size: 19px; line-height: 1.14; font-weight: 800; text-wrap: balance; }
+  .card:not(.has-thumb) .poster-copy { inset: 42px 18px 18px 18px; }
+  .card:not(.has-thumb) .poster-title { font-size: 22px; color: #f8ead3; }
+  .card .num { position: absolute; top: 8px; left: 8px; background: rgba(16,12,7,0.78); color: #fff; font-size: 11px; line-height: 1; padding: 4px 7px; border-radius: 5px; font-variant-numeric: tabular-nums; letter-spacing: 0.03em; z-index: 3; pointer-events: none; max-width: calc(100% - 16px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card.spacer { visibility: hidden; pointer-events: none; }
+  #ov-gallery .card .num { opacity: .88; transition: opacity .25s; }
+  #ov-gallery .card:hover .num { opacity: 1; }
+
+  .overview-title { position: fixed; top: 24px; left: 0; right: 0; text-align: center; font-size: 13px; letter-spacing: 0.22em; text-transform: uppercase; z-index: 40; pointer-events: none; }
+  body[data-ov="grid"]    .overview-title { color: #5a5346; opacity: 0.66; }
+  body[data-ov="gallery"] .overview-title { color: rgba(244,238,224,0.7); text-shadow: 0 2px 12px rgba(0,0,0,0.6); }
+
+  .start-btn { position: fixed; bottom: 26px; right: 26px; border: 0; padding: 13px 24px; border-radius: 999px; font-size: 15px; font-family: inherit; letter-spacing: 0.04em; cursor: pointer; z-index: 200; transition: transform .18s, box-shadow .18s; }
+  body[data-ov="grid"]    .start-btn { background: #1a1712; color: #fff; box-shadow: 0 8px 28px rgba(40,34,24,0.28); }
+  body[data-ov="gallery"] .start-btn { background: #f4eee0; color: #1a1712; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .start-btn:hover { transform: translateY(-2px); }
+
+  /* ════════ 演示模式 ════════ */
+  #stage { position: fixed; top: 50%; left: 50%; transform-origin: top left; will-change: transform; background: #fff; box-shadow: 0 10px 60px rgba(0,0,0,0.4); }
+  #stage iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+  .counter { position: fixed; bottom: 20px; right: 20px; background: rgba(0,0,0,0.65); color: #fff; padding: 6px 14px; border-radius: 999px; font-size: 13px; letter-spacing: 0.05em; font-variant-numeric: tabular-nums; z-index: 100; opacity: 0.7; }
+  .counter .label { color: rgba(255,255,255,0.7); margin-left: 8px; }
+  .overview-btn { position: fixed; top: 20px; left: 20px; background: rgba(0,0,0,0.55); color: rgba(255,255,255,0.85); border: 0; padding: 7px 14px; border-radius: 999px; font-size: 13px; font-family: inherit; cursor: pointer; z-index: 100; opacity: 0.6; }
+  .overview-btn:hover { opacity: 1; }
+  .lang-switch { position: fixed; top: 20px; right: 26px; z-index: 220; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(22,18,12,0.56); backdrop-filter: blur(12px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+  .lang-switch button { min-width: 56px; border: 0; border-radius: 999px; padding: 8px 12px; color: rgba(255,255,255,0.72); background: transparent; font-size: 13px; font-family: inherit; letter-spacing: 0.05em; cursor: pointer; }
+  .lang-switch button[aria-pressed="true"] { color: #171512; background: #fffaf0; }
+  .nav-zone { position: fixed; top: 0; bottom: 0; width: 15%; cursor: pointer; z-index: 50; }
+  .nav-zone.left { left: 0; } .nav-zone.right { right: 0; }
+  .nav-hint { position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 999px; border: 1px solid rgba(255,250,240,0.36); background: rgba(23,21,18,0.72); color: rgba(255,250,240,0.96); display: flex; align-items: center; justify-content: center; font-size: 25px; opacity: 0; box-shadow: 0 12px 34px rgba(0,0,0,0.34), 0 0 0 1px rgba(0,0,0,0.12); backdrop-filter: blur(10px); transition: opacity .2s, transform .2s; }
+  .nav-zone.left .nav-hint { left: 20px; } .nav-zone.right .nav-hint { right: 20px; }
+  .nav-zone:hover .nav-hint { opacity: .96; transform: translateY(-50%) scale(1.03); }
+
+  @media print {
+    @page { size: 1920px 1080px; margin: 0; }
+    html, body { background: #fff; overflow: visible; height: auto; }
+    body[data-mode] .overview { display: none !important; }
+    #stage { position: static; transform: none !important; box-shadow: none; }
+    .counter, .nav-zone, .overview-btn, .start-btn, .lang-switch { display: none !important; }
+    .print-stack { display: block; }
+    .print-stack iframe { width: 1920px; height: 1080px; page-break-after: always; display: block; }
+  }
+</style>
+</head>
+<body data-mode="overview">
+
+<div id="ov-grid" class="overview">
+  <div class="overview-title" id="gridTitle">Overview · 点击任意页进入演示</div>
+  <div class="wall-wrap"><div class="wall" id="wall"></div></div>
+</div>
+
+<div id="ov-gallery" class="overview">
+  <div class="stage3d"><div class="breathe"><div class="drift-layer" id="driftLayer"><div class="gallery" id="gallery"></div></div></div></div>
+  <div class="vignette"></div>
+  <div class="overview-title" id="galleryTitle">顺序画廊 · 自动滑动 · 点击任意页进入演示</div>
+</div>
+
+<div class="lang-switch" role="group" aria-label="Language">
+  <button type="button" class="lang-option" data-lang="zh" aria-pressed="true">中文</button>
+  <button type="button" class="lang-option" data-lang="en" aria-pressed="false">EN</button>
+</div>
+
+<button class="start-btn" id="startBtn">▶ 开始演示</button>
+
+<div id="present-ui">
+  <div id="stage"><iframe id="frame" src="about:blank"></iframe></div>
+  <button class="overview-btn" id="overviewBtn">⊞ 概览</button>
+  <div class="nav-zone left"  id="navL"><div class="nav-hint">‹</div></div>
+  <div class="nav-zone right" id="navR"><div class="nav-hint">›</div></div>
+  <div class="counter" id="counter">1 / 1</div>
+</div>
+
+<div class="print-stack" id="printStack" style="display:none;"></div>
+
+<script>
+(function () {
+  const W = window.DECK_WIDTH || 1920;
+  const H = window.DECK_HEIGHT || 1080;
+  const deck = window.DECK_MANIFEST || [];
+  const CARD_W = window.GALLERY_CARD_W || 300;
+  const DRIFT_SEC = window.GALLERY_DRIFT_SECONDS || 80;
+  const stage = document.getElementById('stage');
+  const frame = document.getElementById('frame');
+  const counter = document.getElementById('counter');
+  const printStack = document.getElementById('printStack');
+  const wall = document.getElementById('wall');
+  const gallery = document.getElementById('gallery');
+  const driftLayer = document.getElementById('driftLayer');
+  const storageKey = 'deck-index-' + location.pathname;
+  const langKey = 'gshow-deck-lang';
+  const langParam = new URLSearchParams(location.search).get('lang');
+  let storedLang = 'zh';
+  try { storedLang = localStorage.getItem(langKey) === 'en' ? 'en' : 'zh'; } catch (_) {}
+  let currentLang = langParam === 'en' ? 'en' : storedLang;
+  let current = 0;
+  let gridBuilt = false;
+  let galleryBuilt = false;
+
+  stage.style.width = W + 'px'; stage.style.height = H + 'px';
+  driftLayer.style.setProperty('--driftSec', DRIFT_SEC + 's');
+
+  // 概览模式：URL ?ov= > window.DECK_OVERVIEW > grid fallback
+  const qp = new URLSearchParams(location.search).get('ov');
+  const OVERVIEW = qp || window.DECK_OVERVIEW || 'grid';
+  document.body.setAttribute('data-ov', OVERVIEW === 'gallery' ? 'gallery' : 'grid');
+  document.body.setAttribute('data-lang', currentLang);
+
+  function activeLabel(item) {
+    return currentLang === 'en' ? (item.labelEn || item.label || '') : (item.label || '');
+  }
+
+  function activeTitle(item) {
+    return currentLang === 'en' ? (item.titleEn || item.title || activeLabel(item)) : (item.title || activeLabel(item));
+  }
+
+  function withLang(file) {
+    const hashIndex = file.indexOf('#');
+    const base = hashIndex >= 0 ? file.slice(0, hashIndex) : file;
+    const hash = hashIndex >= 0 ? file.slice(hashIndex) : '';
+    return base + (base.includes('?') ? '&' : '?') + 'lang=' + currentLang + hash;
+  }
+
+  function syncChromeText() {
+    document.body.setAttribute('data-lang', currentLang);
+    document.querySelectorAll('.lang-option').forEach((button) => {
+      button.setAttribute('aria-pressed', button.dataset.lang === currentLang ? 'true' : 'false');
+    });
+    document.getElementById('gridTitle').textContent = currentLang === 'en'
+      ? 'Overview · Click any slide to present'
+      : 'Overview · 点击任意页进入演示';
+    document.getElementById('galleryTitle').textContent = currentLang === 'en'
+      ? 'Sequential Gallery · Auto drift · Click any slide to present'
+      : '顺序画廊 · 自动滑动 · 点击任意页进入演示';
+    document.getElementById('startBtn').textContent = currentLang === 'en' ? '▶ Start' : '▶ 开始演示';
+    document.getElementById('overviewBtn').textContent = currentLang === 'en' ? '⊞ Overview' : '⊞ 概览';
+    counter.innerHTML = (current + 1) + ' / ' + deck.length + ' <span class="label">' + activeLabel(deck[current] || {}) + '</span>';
+  }
+
+  function updateOverviewLabels() {
+    document.querySelectorAll('.card[data-idx]').forEach((card) => {
+      const idx = Number(card.dataset.idx);
+      const item = deck[idx] || {};
+      const num = card.querySelector('.num');
+      const kicker = card.querySelector('.poster-kicker');
+      const title = card.querySelector('.poster-title');
+      if (num) num.textContent = (idx + 1) + (activeLabel(item) ? ' · ' + activeLabel(item) : '');
+      if (kicker) kicker.textContent = activeLabel(item);
+      if (title) title.textContent = activeTitle(item);
+    });
+  }
+
+  function broadcastLang() {
+    document.querySelectorAll('iframe').forEach((ifr) => {
+      try {
+        ifr.contentWindow.postMessage({ type: 'gshow:set-lang', lang: currentLang }, '*');
+      } catch (_) {}
+    });
+  }
+
+  function setDeckLang(lang) {
+    currentLang = lang === 'en' ? 'en' : 'zh';
+    try { localStorage.setItem(langKey, currentLang); } catch (_) {}
+    syncChromeText();
+    if (document.body.getAttribute('data-mode') === 'overview') updateOverviewLabels();
+    else broadcastLang();
+  }
+
+  function setMode(mode) {
+    document.body.setAttribute('data-mode', mode);
+    if (mode === 'present') { fit(); show(current); }
+    else { requestAnimationFrame(buildOverview); }
+  }
+
+  /* ─ 媒体（缩略图优先，否则 iframe） ─ */
+  function makeCard(idx, eager) {
+    const card = document.createElement('div');
+    card.className = 'card'; card.dataset.idx = idx;
+    const item = deck[idx];
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (item.thumb) {
+      card.classList.add('has-thumb');
+      const im = document.createElement('img');
+      im.className = 'thumb-img';
+      im.src = item.thumb;
+      im.alt = activeTitle(item);
+      im.decoding = 'async';
+      im.loading = (eager == null ? idx < 8 : eager) ? 'eager' : 'lazy';
+      thumb.appendChild(im);
+    } else {
+      const pattern = document.createElement('div');
+      pattern.className = 'poster-pattern';
+      thumb.appendChild(pattern);
+    }
+    card.appendChild(thumb);
+    const poster = document.createElement('div');
+    poster.className = 'poster-copy';
+    const kicker = document.createElement('div');
+    kicker.className = 'poster-kicker';
+    kicker.textContent = activeLabel(item);
+    const title = document.createElement('div');
+    title.className = 'poster-title';
+    title.textContent = activeTitle(item);
+    poster.appendChild(kicker);
+    poster.appendChild(title);
+    card.appendChild(poster);
+    const num = document.createElement('div');
+    num.className = 'num';
+    num.textContent = (idx + 1) + (activeLabel(item) ? ' · ' + activeLabel(item) : '');
+    card.appendChild(num);
+    card.addEventListener('click', () => { current = idx; setMode('present'); });
+    return card;
+  }
+
+  function buildOverview() {
+    if (document.body.getAttribute('data-mode') !== 'overview') return;
+    if (OVERVIEW === 'gallery') buildGallery(); else buildGrid();
+  }
+
+  /* ════════ 网格墙（自适应） ════════ */
+  function buildGrid() {
+    const n = deck.length; if (!n) return;
+    if (gridBuilt && wall.childElementCount === n) {
+      updateOverviewLabels();
+      layoutWall();
+      return;
+    }
+    wall.innerHTML = '';
+    for (let i = 0; i < n; i++) wall.appendChild(makeCard(i));
+    gridBuilt = true;
+    layoutWall();
+  }
+  const GRID_PAD = 74;  // #ov-grid scroll 顶部 padding，算动态 transform-origin 用
+  function layoutWall() {
+    const n = deck.length; if (!n) return;
+    const vw = innerWidth, vh = innerHeight, gap = 26;
+    const availW = vw * 0.86;                                   // 留 rotateZ 横向余量（强对角也不裁切）
+    const target = 280;
+    let cols = Math.max(3, Math.min(9, Math.floor((availW + gap) / (target + gap))));
+    cols = Math.min(cols, n);
+    const rows = Math.ceil(n / cols);
+    const cardW = Math.min(target + 40, (availW - (cols - 1) * gap) / cols);
+    const cardH = cardW * 9 / 16;
+    const baseW = cols * cardW + (cols - 1) * gap;
+    const wallH = rows * cardH + (rows - 1) * gap;
+    wall.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+    wall.style.gap = gap + 'px';
+    wall.style.width = baseW + 'px';
+    // 单平面(无 preserve-3d)→任意角度都不重叠、可点；fit 与 scroll 都给强对角倾斜
+    if (wallH <= vh * 0.80) {
+      document.body.setAttribute('data-grid', 'fit');
+      const rx = Math.max(11, Math.min(15, 15 - (rows - 2) * 1.1));
+      const rz = Math.max(8, Math.min(11, 11 - (rows - 2) * 0.7));
+      wall.style.setProperty('--rx', rx); wall.style.setProperty('--rz', rz);
+      wall.style.transformOrigin = 'center center';
+      const tilt = 'rotateX(' + rx + 'deg) rotateZ(-' + rz + 'deg)';
+      wall.style.transform = tilt;
+      const r = wall.getBoundingClientRect();
+      let s = Math.min(vw * 0.92 / r.width, vh * 0.80 / r.height);
+      s = Math.max(0.6, Math.min(s, 1.6));
+      wall.style.transform = 'scale(' + s + ') ' + tilt;
+    } else {
+      // 多页：舒适大小竖向滚动 + 强对角倾斜；transform-origin 跟随滚动→消除高墙 rotateZ 把远端行甩出屏幕
+      document.body.setAttribute('data-grid', 'scroll');
+      wall.style.setProperty('--rx', 14); wall.style.setProperty('--rz', 7);
+      wall.style.transform = 'rotateX(14deg) rotateZ(-7deg)';
+      updateScrollOrigin();
+    }
+  }
+  function updateScrollOrigin() {
+    if (document.body.getAttribute('data-grid') !== 'scroll') return;
+    const ovg = document.getElementById('ov-grid');
+    wall.style.transformOrigin = '50% ' + (ovg.scrollTop + window.innerHeight / 2 - GRID_PAD) + 'px';
+  }
+
+  /* ════════ 无限画廊（按页码顺序重复） ════════ */
+  function buildGallery() {
+    const n = deck.length; if (!n) return;
+    if (galleryBuilt && gallery.childElementCount > 0) {
+      updateOverviewLabels();
+      return;
+    }
+    const vw = innerWidth, vh = innerHeight, gap = 18;
+    const cardW = CARD_W, cardH = cardW * 9 / 16;
+    const cellW = cardW + gap, cellH = cardH + gap;
+
+    const idealCols = Math.min(6, Math.max(4, Math.round(Math.sqrt(n * 2))));
+    let tileCols = Math.min(n, idealCols);
+    for (let c = Math.min(6, n); c >= 4; c--) {
+      if (n % c === 0) { tileCols = c; break; }
+    }
+    const tileRows = Math.ceil(n / tileCols);
+    const tileW = tileCols * cellW;
+    const tileH = tileRows * cellH;
+    const repeatCols = Math.max(3, Math.ceil(vw / tileW) + 1);
+    const repeatRows = Math.max(3, Math.ceil(vh / tileH) + 1);
+    const cols = tileCols * repeatCols;
+
+    driftLayer.style.setProperty('--dx', (tileCols * cellW) + 'px');
+    driftLayer.style.setProperty('--dy', (tileRows * cellH) + 'px');
+    gallery.style.gridTemplateColumns = 'repeat(' + cols + ', ' + cardW + 'px)';
+    gallery.style.gridAutoRows = cardH + 'px';
+    gallery.style.gap = gap + 'px';
+    gallery.innerHTML = '';
+    for (let tileY = 0; tileY < repeatRows; tileY++) {
+      for (let row = 0; row < tileRows; row++) {
+        for (let tileX = 0; tileX < repeatCols; tileX++) {
+          for (let col = 0; col < tileCols; col++) {
+            const idx = row * tileCols + col;
+            if (idx >= n) {
+              const spacer = document.createElement('div');
+              spacer.className = 'card spacer';
+              spacer.setAttribute('aria-hidden', 'true');
+              gallery.appendChild(spacer);
+            } else {
+              gallery.appendChild(makeCard(idx, tileY === 0 && tileX === 0 && idx < 8));
+            }
+          }
+        }
+      }
+    }
+    galleryBuilt = true;
+  }
+
+  /* ════════ 演示 ════════ */
+  function fit() {
+    const s = Math.min(innerWidth / W, innerHeight / H);
+    stage.style.transform = 'translate(' + ((innerWidth - W * s) / 2) + 'px, ' + ((innerHeight - H * s) / 2) + 'px) scale(' + s + ')';
+    stage.style.top = '0'; stage.style.left = '0';
+  }
+  function show(idx) {
+    if (idx < 0 || idx >= deck.length) return;
+    current = idx;
+    const target = withLang(deck[idx].file);
+    if (frame.getAttribute('src') !== target) frame.src = target;
+    else broadcastLang();
+    counter.innerHTML = (idx + 1) + ' / ' + deck.length + ' <span class="label">' + activeLabel(deck[idx]) + '</span>';
+    try { localStorage.setItem(storageKey, String(idx)); } catch (_) {}
+    if (location.hash !== '#' + (idx + 1)) history.replaceState(null, '', '#' + (idx + 1));
+  }
+  function next() { show(Math.min(current + 1, deck.length - 1)); }
+  function prev() { show(Math.max(current - 1, 0)); }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'l' || e.key === 'L') { e.preventDefault(); setDeckLang(currentLang === 'en' ? 'zh' : 'en'); return; }
+    if (e.key === 'Escape') { if (document.body.getAttribute('data-mode') === 'present') { e.preventDefault(); setMode('overview'); } return; }
+    if (e.key === 'p' || e.key === 'P') { window.print(); return; }
+    if (document.body.getAttribute('data-mode') !== 'present') return;
+    switch (e.key) {
+      case 'ArrowRight': case ' ': case 'PageDown': e.preventDefault(); next(); break;
+      case 'ArrowLeft': case 'PageUp': e.preventDefault(); prev(); break;
+      case 'Home': e.preventDefault(); show(0); break;
+      case 'End': e.preventDefault(); show(deck.length - 1); break;
+      default: if (e.key >= '1' && e.key <= '9') { const i = parseInt(e.key, 10) - 1; if (i < deck.length) { e.preventDefault(); show(i); } }
+    }
+  });
+  document.getElementById('navL').addEventListener('click', prev);
+  document.getElementById('navR').addEventListener('click', next);
+  document.getElementById('startBtn').addEventListener('click', () => setMode('present'));
+  document.getElementById('overviewBtn').addEventListener('click', () => setMode('overview'));
+  document.querySelectorAll('.lang-option').forEach((button) => {
+    button.addEventListener('click', () => setDeckLang(button.dataset.lang));
+  });
+  window.addEventListener('message', (event) => {
+    if (!event.data || event.data.type !== 'gshow:toggle-lang') return;
+    setDeckLang(currentLang === 'en' ? 'zh' : 'en');
+  });
+  let rT;
+  window.addEventListener('resize', () => {
+    fit();
+    clearTimeout(rT);
+    if (document.body.getAttribute('data-mode') === 'overview') galleryBuilt = false;
+    rT = setTimeout(buildOverview, 140);
+  });
+  document.getElementById('ov-grid').addEventListener('scroll', updateScrollOrigin, { passive: true });
+  window.addEventListener('hashchange', () => { const m = location.hash.match(/^#(\d+)$/); if (m) { current = parseInt(m[1], 10) - 1; setMode('present'); } });
+
+  const hashMatch = location.hash.match(/^#(\d+)$/);
+  if (hashMatch) current = Math.min(parseInt(hashMatch[1], 10) - 1, deck.length - 1);
+  else { try { const v = parseInt(localStorage.getItem(storageKey), 10); if (!isNaN(v) && v >= 0 && v < deck.length) current = v; } catch (_) {} }
+
+  syncChromeText();
+  fit();
+  if (hashMatch) setMode('present'); else { setMode('overview'); buildOverview(); }
+
+  window.addEventListener('beforeprint', () => { printStack.innerHTML = ''; deck.forEach(item => { const f = document.createElement('iframe'); f.src = withLang(item.file); printStack.appendChild(f); }); printStack.style.display = 'block'; stage.style.display = 'none'; });
+  window.addEventListener('afterprint', () => { printStack.innerHTML = ''; printStack.style.display = 'none'; stage.style.display = ''; });
+})();
+</script>
+</body>
+</html>
